@@ -5,3 +5,8 @@
   * http response code
   * response time
 * Rate of errors can be controlled over a REST API (control plane)
+
+# run
+
+* `go run main.go`
+* `curl localhost:8000/best-tools`
