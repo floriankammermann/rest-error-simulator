@@ -16,6 +16,11 @@ func getResponseCode(requestCounter, ratio, successCode, errorCode int) int {
 	}
 }
 
+func setRestRatio(errorratioInt int) int {
+	restratio := 100 / errorratioInt
+	return restratio
+}
+
 func main() {
 
 	var responseCode = http.StatusOK
@@ -25,7 +30,7 @@ func main() {
 
 	bestTools := func(w http.ResponseWriter, req *http.Request) {
 		rest := requestCounter % ratio
-		if rest == 0 {
+		if rest != 0 {
 			w.WriteHeader(responseCodeSuccess)
 		} else {
 			w.WriteHeader(responseCode)
@@ -46,6 +51,7 @@ func main() {
 		if err != nil {
 			log.Printf("errorcode is not a number: %s", errorcode)
 		}
+		log.Printf("set errorcode to %s", errorcode)
 		responseCode = errorcodeInt
 
 		errorratio := req.URL.Query()["errorratio"]
@@ -56,12 +62,20 @@ func main() {
 		if err != nil {
 			log.Printf("errorratio is not a number: %s", errorratio)
 		}
-		if errorratioInt == 50 {
-			log.Println("set errorration to 2")
+		/*if errorratioInt == 50 {
+			log.Println("set errorratio to 2 (50%)")
 			ratio = 2
-		}
-		// TODO: implement more ratios
-		// TODO: implement ratios < 2
+		} else if errorratioInt == 20 {
+			log.Println("set errorratio to 5 (20%)")
+			ratio = 5
+		} else if errorratioInt == 33 {
+			log.Println("set errorratio to 3 (30%)")
+			ratio = 3
+		}*/
+		ratio = setRestRatio(errorratioInt)
+		logResponse := "set erroratio to " + strconv.Itoa(ratio) + " (" + strconv.Itoa(errorratioInt) + "%)"
+		log.Println(logResponse)
+
 	}
 
 	http.HandleFunc("/best-tools", bestTools)
