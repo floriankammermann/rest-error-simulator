@@ -24,11 +24,12 @@ var (
 )
 
 type Specification struct {
-	ResponseCodeSuccess                   int
-	ResponseCodeFailure                   int
-	ResponseCodeSuccessFailureRatio       int
-	ResponseCodeSuccessFailureRatioModulo int
+	ResponseCodeSuccess             int
+	ResponseCodeFailure             int
+	ResponseCodeSuccessFailureRatio int
 }
+
+var failureRatioModulo int
 
 func (s *Specification) init() {
 	if s.ResponseCodeSuccess == 0 {
@@ -38,16 +39,21 @@ func (s *Specification) init() {
 		s.ResponseCodeFailure = 500
 	}
 	if s.ResponseCodeSuccessFailureRatio == 0 {
-		s.ResponseCodeSuccessFailureRatioModulo = 1
+		failureRatioModulo = 1
 	}
 	if s.ResponseCodeSuccessFailureRatio == 50 {
-		s.ResponseCodeSuccessFailureRatioModulo = 2
+		failureRatioModulo = 2
 	}
 }
 
-func getResponseCode(requestCounter, ratio, successCode, errorCode int) int {
-	rest := requestCounter % ratio
-	if rest == 0 {
+func setRestRatio(errorratioInt int) int {
+	restratio := 100 / errorratioInt
+	return restratio
+}
+
+func getResponseCode(requestCounter, ratioModulo, successCode, errorCode int) int {
+	rest := requestCounter % ratioModulo
+	if rest != 0 {
 		return successCode
 	} else {
 		return errorCode
@@ -65,19 +71,20 @@ func main() {
 	var requestCounter = 1
 
 	bestTools := func(w http.ResponseWriter, req *http.Request) {
-		rest := requestCounter % s.ResponseCodeSuccessFailureRatioModulo
-		if rest == 0 {
-			w.WriteHeader(s.ResponseCodeSuccess)
+		responseCode := getResponseCode(requestCounter, failureRatioModulo, s.ResponseCodeSuccess, s.ResponseCodeFailure)
+		w.WriteHeader(responseCode)
+		if responseCode == s.ResponseCodeSuccess {
+			log.Printf("return success responseCode %d", s.ResponseCodeSuccess)
 			ResponseCodeInternalServerError.Inc()
 		} else {
-			w.WriteHeader(s.ResponseCodeFailure)
+			log.Printf("return failure responseCode %d", s.ResponseCodeFailure)
 			ResponseCodeStatusOK.Inc()
 		}
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, `{"bestTools":{"cidcd": "Jenkins"}}`)
 		requestCounter++
 		log.Printf("requestCounter: %d", requestCounter)
-		log.Printf("ratio: %d", s.ResponseCodeSuccessFailureRatio)
+		log.Printf("ratioModulo: %d", failureRatioModulo)
 	}
 
 	introduceHttpErrorCodes := func(w http.ResponseWriter, req *http.Request) {
@@ -97,10 +104,8 @@ func main() {
 			if err != nil {
 				log.Printf("errorratio is not a number: %s", errorratio)
 			}
-			if errorratioInt == 50 {
-				log.Println("set errorration to 2")
-				s.ResponseCodeSuccessFailureRatio = 2
-			}
+			failureRatioModulo = setRestRatio(errorratioInt)
+			log.Printf("set failureRatioModulo to %d", failureRatioModulo)
 		}
 		// TODO: implement more ratios
 		// TODO: implement ratios < 2

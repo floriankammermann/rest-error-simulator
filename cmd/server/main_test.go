@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-func TestRatio(t *testing.T) {
+func TestResponseCode(t *testing.T) {
 	responseCode := getResponseCode(1, 1, 200, 500)
 	if responseCode != 200 {
 		t.Fail()
@@ -11,5 +11,4 @@ func TestRatio(t *testing.T) {
 	if responseCode != 500 {
 		t.Fail()
 	}
-
 }

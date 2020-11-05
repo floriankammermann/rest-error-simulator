@@ -20,6 +20,7 @@ func execRequest(s Specification) {
 	resp, err := http.Get(s.Endpoint)
 	if err != nil {
 		log.Printf("got error, while calling %s: %s", s.Endpoint, err)
+		return
 	}
 
 	defer resp.Body.Close()
@@ -27,6 +28,7 @@ func execRequest(s Specification) {
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("got error, while reading response of %s: %s", s.Endpoint, err)
+		return
 	}
 
 	log.Printf("endpoint: %s, responseCode %d, responseBody: %s", s.Endpoint, resp.StatusCode, string(body))
