@@ -1,39 +1,35 @@
 package main
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/kelseyhightower/envconfig"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
-)
-
-var (
-	ResponseCodeInternalServerError = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "response_internal_server_error",
-		Help: "amount of internal server errors",
-	})
-	ResponseCodeStatusOK = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "response_status_ok",
-		Help: "amount of status ok",
-	})
 )
 
 type Specification struct {
+	Port                  int
 	RequestFrequencyInSec int
 	Endpoint              string
 }
 
-func getResponseCode(requestCounter, ratio, successCode, errorCode int) int {
-	rest := requestCounter % ratio
-	if rest == 0 {
-		return successCode
-	} else {
-		return errorCode
+func execRequest(s Specification) {
+	resp, err := http.Get(s.Endpoint)
+	if err != nil {
+		log.Printf("got error, while calling %s: %s", s.Endpoint, err)
 	}
+
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("got error, while reading response of %s: %s", s.Endpoint, err)
+	}
+
+	log.Printf("endpoint: %s, responseCode %d, responseBody: %s", s.Endpoint, resp.StatusCode, string(body))
 }
 
 func callServer(s Specification, quit chan struct{}) {
@@ -42,6 +38,7 @@ func callServer(s Specification, quit chan struct{}) {
 		select {
 		case <-ticker.C:
 			log.Printf("Call endpoint: %s, with frequency: %d", s.Endpoint, s.RequestFrequencyInSec)
+			execRequest(s)
 		case <-quit:
 			ticker.Stop()
 			return
@@ -90,6 +87,9 @@ func main() {
 	}
 
 	http.HandleFunc("/control", setEndpointAndFrequency)
-	log.Println("Listening for requests at http://localhost:8080/control")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	if s.Port == 0 {
+		s.Port = 8080
+	}
+	log.Printf("Listening for requests at http://localhost:%d/control", s.Port)
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(s.Port), nil))
 }
