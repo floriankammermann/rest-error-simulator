@@ -1,0 +1,9 @@
+---
+command: 
+applications:
+  - name: rest-error-simulator
+    command: ./rest-error-simulator
+    memory: 1024M
+    instances: 1
+    buildpacks:
+      - binary_buildpack
