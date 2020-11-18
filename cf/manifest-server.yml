@@ -1,9 +1,8 @@
 ---
-command: 
 applications:
-  - name: rest-error-simulator
-    command: ./rest-error-simulator
-    memory: 1024M
+  - name: rest-error-simulator-server-((instancenumber))
+    command: ./rest-error-simulator-server
+    memory: 128M
     instances: 1
     buildpacks:
       - binary_buildpack
