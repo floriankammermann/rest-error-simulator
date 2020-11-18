@@ -21,8 +21,8 @@
 # run client
 
 * set envs (not mandatory) 
-  * `export RES_REQUESTFREQUENCYINSEC=200`
-  * `export RES_ENDPOINT=500`
+  * `export RES_REQUESTFREQUENCYINSEC=1`
+  * `export RES_ENDPOINT=http://rest-error-simulator.com`
 * `make build-client`
 * `bin/rest-error-simulator-client
 * set the control `curl localhost:8080/control?frequency=3`
