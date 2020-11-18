@@ -55,6 +55,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	if s.RequestFrequencyInSec == 0 {
+		s.RequestFrequencyInSec = 1
+	}
+
 	log.Printf("got endpoint: %s, frequency: %d", s.Endpoint, s.RequestFrequencyInSec)
 	var quit chan struct{}
 
@@ -92,6 +96,6 @@ func main() {
 	if s.Port == 0 {
 		s.Port = 8080
 	}
-	log.Printf("Listening for requests at http://localhost:%d/control", s.Port)
+	log.Printf("Listening for requests at Port %d", s.Port)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(s.Port), nil))
 }
