@@ -1,0 +1,10 @@
+---
+applications:
+  - name: rest-error-simulator-client-((instancenumber))
+    command: ./rest-error-simulator-client
+    memory: 128M
+    instances: 1
+    buildpacks:
+      - binary_buildpack
+    env:
+      RES_ENDPOINT: ((resendpoint))

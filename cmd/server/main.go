@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -15,11 +16,11 @@ import (
 var (
 	ResponseCodeInternalServerError = promauto.NewCounter(prometheus.CounterOpts{
 		Name: "response_internal_server_error",
-		Help: "amount of internal server errors",
+		Help: "amount of response internal server errors",
 	})
 	ResponseCodeStatusOK = promauto.NewCounter(prometheus.CounterOpts{
-		Name: "response_status_ok",
-		Help: "amount of status ok",
+		Name: "response_ok",
+		Help: "amount of response status ok",
 	})
 )
 
@@ -39,14 +40,11 @@ func (s *Specification) init() {
 		s.ResponseCodeFailure = 500
 	}
 	if s.ResponseCodeSuccessFailureRatio == 0 {
-		failureRatioModulo = 1
-	}
-	if s.ResponseCodeSuccessFailureRatio == 50 {
-		failureRatioModulo = 2
+		s.ResponseCodeSuccessFailureRatio = 1
 	}
 }
 
-func setRestRatio(errorratioInt int) int {
+func calculateFailureRationModulo(errorratioInt int) int {
 	restratio := 100 / errorratioInt
 	return restratio
 }
@@ -61,24 +59,27 @@ func getResponseCode(requestCounter, ratioModulo, successCode, errorCode int) in
 }
 
 func main() {
-	var s Specification
-	err := envconfig.Process("res", &s)
+	s := &Specification{}
+	err := envconfig.Process("res", s)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 	s.init()
+	failureRatioModulo = calculateFailureRationModulo(s.ResponseCodeSuccessFailureRatio)
+	log.Printf("start with responseCodeSuccess: %d, responseCodeFailure: %d, responseCodeFailureRatio: %d, failureRatioModulo: %d", s.ResponseCodeSuccess, s.ResponseCodeFailure, s.ResponseCodeSuccessFailureRatio, failureRatioModulo)
 
-	var requestCounter = 1
+	var requestCounter = 0
 
 	bestTools := func(w http.ResponseWriter, req *http.Request) {
-		responseCode := getResponseCode(requestCounter, failureRatioModulo, s.ResponseCodeSuccess, s.ResponseCodeFailure)
+		// we have to add 1 to the requestCounter to prohibit modulo operation with 0
+		responseCode := getResponseCode(requestCounter+1, failureRatioModulo, s.ResponseCodeSuccess, s.ResponseCodeFailure)
 		w.WriteHeader(responseCode)
 		if responseCode == s.ResponseCodeSuccess {
 			log.Printf("return success responseCode %d", s.ResponseCodeSuccess)
-			ResponseCodeInternalServerError.Inc()
+			ResponseCodeStatusOK.Inc()
 		} else {
 			log.Printf("return failure responseCode %d", s.ResponseCodeFailure)
-			ResponseCodeStatusOK.Inc()
+			ResponseCodeInternalServerError.Inc()
 		}
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, `{"bestTools":{"cidcd": "Jenkins"}}`)
@@ -88,6 +89,13 @@ func main() {
 	}
 
 	introduceHttpErrorCodes := func(w http.ResponseWriter, req *http.Request) {
+
+		if req.Method != "POST" {
+			w.WriteHeader(405)
+			io.WriteString(w, "only POST allowed")
+			return
+		}
+
 		errorcode := req.URL.Query()["errorcode"]
 		errorratio := req.URL.Query()["errorratio"]
 
@@ -104,15 +112,26 @@ func main() {
 			if err != nil {
 				log.Printf("errorratio is not a number: %s", errorratio)
 			}
-			failureRatioModulo = setRestRatio(errorratioInt)
+			failureRatioModulo = calculateFailureRationModulo(errorratioInt)
 			log.Printf("set failureRatioModulo to %d", failureRatioModulo)
 		}
-		// TODO: implement more ratios
-		// TODO: implement ratios < 2
+	}
+	controlParams := func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Add("Content-Type", "application/json")
+		responseBody := fmt.Sprintf(
+			`{"responseCodeSuccess":%d, "responseCodeFailure":%d, "responseCodeSuccessFailureRatio":%d, "ratioModulo":%d, "requestCounter":%d}`,
+			s.ResponseCodeSuccess,
+			s.ResponseCodeFailure,
+			s.ResponseCodeSuccessFailureRatio,
+			failureRatioModulo,
+			requestCounter,
+		)
+		io.WriteString(w, responseBody)
 	}
 
 	http.HandleFunc("/best-tools", bestTools)
 	http.HandleFunc("/control/error", introduceHttpErrorCodes)
+	http.HandleFunc("/control", controlParams)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println("Listening for requests at http://localhost:8080/best-tools")
 	log.Fatal(http.ListenAndServe(":8080", nil))
