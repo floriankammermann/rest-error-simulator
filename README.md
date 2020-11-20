@@ -8,28 +8,30 @@
 
 ## What for a rate do you get
 
-errorratio=1   100% 200
-errorratio=2   98% 200
-errorratio=3   97% 200
-errorratio=4   96% 200
-errorratio=5   95% 200
-errorratio=6   94% 200
-errorratio=7   93% 200
-errorratio=8   92% 200
-errorratio=9   91% 200
-errorratio=10  90% 200
-errorratio=11  89% 200
-errorratio=12  88% 200
-errorratio=13  87% 200
-errorratio=14  86% 200
-errorratio=15  83% 200
-errorratio=16  83% 200
-errorratio=17  80% 200
-errorratio=18  80% 200
-errorratio=25  75% 200
-errorratio=33  66% 200
-errorratio=50  50% 200
-errorratio=100 0%  200
+| errorratio | percentage | responsecode |
+|------------|------------|--------------|
+| 1          | 100        | 200          |
+| 2          | 98         | 200          |
+| 3          | 97         | 200          |
+| 4          | 96         | 200          |
+| 5          | 95         | 200          |
+| 6          | 94         | 200          |
+| 7          | 93         | 200          |
+| 8          | 92         | 200          |
+| 9          | 91         | 200          |
+| 10         | 90         | 200          |
+| 11         | 89         | 200          |
+| 12         | 88         | 200          |
+| 13         | 87         | 200          |
+| 14         | 86         | 200          |
+| 15         | 83         | 200          |
+| 16         | 83         | 200          |
+| 17         | 80         | 200          |
+| 18         | 80         | 200          |
+| 25         | 75         | 200          |
+| 33         | 66         | 200          |
+| 50         | 50         | 200          |
+| 100        | 0          | 200          |
 
 # run server
 
