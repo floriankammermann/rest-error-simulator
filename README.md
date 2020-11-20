@@ -42,7 +42,7 @@ example request: `curl http://localhost:8080/control/error?errorratio=2 -X POST`
   * `export RES_RESPONSECODEFAILURE=500`
   * `export RES_RESPONSECODESUCCESSFAILURERATIO=50`
 * `make build-server`
-* `bin/rest-error-simulator-server
+* `bin/rest-error-simulator-server`
 * get the data `curl localhost:8080/best-tools`
 * set the control `curl localhost:8080/control/error?errorratio=50`
 * get the metrics `curl localhost:8080/metrics`
@@ -53,5 +53,5 @@ example request: `curl http://localhost:8080/control/error?errorratio=2 -X POST`
   * `export RES_REQUESTFREQUENCYINSEC=1`
   * `export RES_ENDPOINT=http://rest-error-simulator.com`
 * `make build-client`
-* `bin/rest-error-simulator-client
+* `bin/rest-error-simulator-client`
 * set the control `curl localhost:8080/control?frequency=3`
