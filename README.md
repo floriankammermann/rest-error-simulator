@@ -8,6 +8,8 @@
 
 ## What for a rate do you get
 
+example request: `curl http://localhost:8080/control/error?errorratio=2 -X POST`
+
 | errorratio | percentage | responsecode |
 |------------|------------|--------------|
 | 1          | 100        | 200          |
