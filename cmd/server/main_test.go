@@ -22,3 +22,15 @@ func TestResponseCode(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestResponseCodeRatio1(t *testing.T) {
+	successFailureErrorRatio := 1
+	failureRatioModulo := calculateFailureRationModulo(successFailureErrorRatio)
+	for i := 1; i <= 101; i++ {
+		responseCode := getResponseCode(i, failureRatioModulo, 200, 500)
+		if responseCode != 200 {
+			log.Println("responseCode is not 200")
+			t.Fail()
+		}
+	}
+}

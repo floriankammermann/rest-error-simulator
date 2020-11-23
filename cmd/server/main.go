@@ -22,6 +22,10 @@ var (
 		Name: "response_ok",
 		Help: "amount of response status ok",
 	})
+	ResponseCodeAll = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "response_all",
+		Help: "all response",
+	})
 )
 
 type Specification struct {
@@ -50,6 +54,10 @@ func calculateFailureRationModulo(errorratioInt int) int {
 }
 
 func getResponseCode(requestCounter, ratioModulo, successCode, errorCode int) int {
+	// if we do not deliver every request as success on ratioModulo 100, we do not get 100% successCode
+	if ratioModulo == 100 {
+		return successCode
+	}
 	rest := requestCounter % ratioModulo
 	if rest != 0 {
 		return successCode
@@ -84,6 +92,7 @@ func main() {
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, `{"bestTools":{"cidcd": "Jenkins"}}`)
 		requestCounter++
+		ResponseCodeAll.Inc()
 		log.Printf("requestCounter: %d", requestCounter)
 		log.Printf("ratioModulo: %d", failureRatioModulo)
 	}
