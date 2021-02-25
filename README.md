@@ -6,7 +6,7 @@
   * response time
 * Rate of errors can be controlled over a REST API (control plane)
 
-## What for a rate do you get
+## Introduce response code errors
 
 example request: `curl http://localhost:8080/control/error?errorratio=2 -X POST`
 
@@ -34,6 +34,10 @@ example request: `curl http://localhost:8080/control/error?errorratio=2 -X POST`
 | 33         | 66         | 200          |
 | 50         | 50         | 200          |
 | 100        | 0          | 200          |
+
+## Introduce response code errors
+
+example request: `curl http://localhost:8080/control/latency?latencyinms=1000`
 
 # run server
 

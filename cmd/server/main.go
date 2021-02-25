@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/prometheus/client_golang/prometheus"
@@ -32,9 +33,11 @@ type Specification struct {
 	ResponseCodeSuccess             int
 	ResponseCodeFailure             int
 	ResponseCodeSuccessFailureRatio int
+	LatencyInMs                     int
 }
 
 var failureRatioModulo int
+var latencyinms int
 
 func (s *Specification) init() {
 	if s.ResponseCodeSuccess == 0 {
@@ -89,6 +92,7 @@ func main() {
 			log.Printf("return failure responseCode %d", s.ResponseCodeFailure)
 			ResponseCodeInternalServerError.Inc()
 		}
+		time.Sleep(time.Duration(s.LatencyInMs) * time.Millisecond)
 		w.Header().Add("Content-Type", "application/json")
 		io.WriteString(w, `{"bestTools":{"cidcd": "Jenkins"}}`)
 		requestCounter++
@@ -125,6 +129,27 @@ func main() {
 			log.Printf("set failureRatioModulo to %d", failureRatioModulo)
 		}
 	}
+
+	introduceLatency := func(w http.ResponseWriter, req *http.Request) {
+
+		if req.Method != "POST" {
+			w.WriteHeader(405)
+			io.WriteString(w, "only POST allowed")
+			return
+		}
+
+		latencyinmsStr := req.URL.Query()["latencyinms"]
+
+		if len(latencyinmsStr) != 0 {
+			latencyinms, err := strconv.Atoi(latencyinmsStr[0])
+			if err != nil {
+				log.Printf("latencyinms is not a number: %s", latencyinmsStr)
+			}
+			s.LatencyInMs = latencyinms
+			log.Printf("set latencyinms to %d", latencyinms)
+		}
+	}
+
 	controlParams := func(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		responseBody := fmt.Sprintf(
@@ -140,6 +165,7 @@ func main() {
 
 	http.HandleFunc("/best-tools", bestTools)
 	http.HandleFunc("/control/error", introduceHttpErrorCodes)
+	http.HandleFunc("/control/latency", introduceLatency)
 	http.HandleFunc("/control", controlParams)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println("Listening for requests at http://localhost:8080/best-tools")
