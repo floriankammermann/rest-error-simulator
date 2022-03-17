@@ -1,0 +1,26 @@
+<style lang="scss">
+  :host {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+</style>
+
+<!-- Toolbar -->
+<div class="home-container" role="banner">
+  <h1>Rest-Error-Simulator-Angular-Frontend</h1>
+  <p class="error_response">{{this.error_response}}</p>
+  <form class="form">
+    <h4>Errorratio</h4>
+    <input #errorratio type="number" class="form__field" placeholder="Errorratio" min="0" max="100"/>
+    <button type="button" class="btn btn--primary btn--inside uppercase" (click)="onSubmitErrorRatio()">Send</button>
+    <br>
+    <h4>Latency</h4>
+    <input #latency type="number" class="form__field" placeholder="Latency" min="0">
+    <button type="button" class="btn btn--primary btn--inside uppercase" (click)="onSubmitLatency()">Send</button>
+    <br>
+  </form>
+</div>
