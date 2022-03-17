@@ -23,7 +23,10 @@ export class AppComponent {
   onSubmitErrorRatio() {
     let _errorRatio = this.errorRatio?.nativeElement.value;
     if (_errorRatio > 0 && _errorRatio <= 100) {
-      this.backendData.sendErrorRatio(_errorRatio)
+      this.error_response = "";
+      this.backendData.sendErrorRatio(_errorRatio).subscribe((response: any) => {
+        console.log(response);
+      });
     } else {
       this.error_response = "Error Ratio ist unter 0 oder über 100. Wähle eine Zahl zwishen 0 und 100."
     }
@@ -31,7 +34,10 @@ export class AppComponent {
   onSubmitLatency() {
     let _latency = this.latency?.nativeElement.value;
     if (_latency > 0 && _latency <= 10000) {
-
+      this.error_response = "";
+      this.backendData.sendLatency(_latency).subscribe((response: any) => {
+        console.log(response);
+      })
     } else {
       this.error_response = "Latency ist unter 0. Wähle eine Zahl über 0."
     }
