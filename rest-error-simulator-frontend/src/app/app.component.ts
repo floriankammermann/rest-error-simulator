@@ -31,6 +31,7 @@ export class AppComponent {
       this.error_response = "Error Ratio ist unter 0 oder über 100. Wähle eine Zahl zwishen 0 und 100."
     }
   }
+  
   onSubmitLatency() {
     let _latency = this.latency?.nativeElement.value;
     if (_latency > 0 && _latency <= 10000) {
