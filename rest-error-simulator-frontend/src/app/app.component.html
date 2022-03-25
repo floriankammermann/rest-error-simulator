@@ -14,13 +14,12 @@
   <h1>Rest-Error-Simulator-Angular-Frontend</h1>
   <p class="error_response">{{this.error_response}}</p>
   <form class="form">
-    <h4>Errorratio</h4>
-    <input #errorratio type="number" class="form__field" placeholder="Errorratio" min="0" max="100"/>
+    <h2>Errorratio</h2>
+    <input #errorratio type="number"  class="form__field" min="0" max="100" value="1"/>
     <button type="button" class="btn btn--primary btn--inside uppercase" (click)="onSubmitErrorRatio()">Send</button>
     <br>
-    <h4>Latency</h4>
-    <input #latency type="number" class="form__field" placeholder="Latency" min="0">
+    <h2>Latency</h2>
+    <input #latency type="number" class="form__field" min="0" max="10000" value="1000">
     <button type="button" class="btn btn--primary btn--inside uppercase" (click)="onSubmitLatency()">Send</button>
-    <br>
   </form>
 </div>

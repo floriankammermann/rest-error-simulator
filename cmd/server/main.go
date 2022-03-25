@@ -103,6 +103,11 @@ func main() {
 
 	introduceHttpErrorCodes := func(w http.ResponseWriter, req *http.Request) {
 
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "POST")
+		w.Header().Add("Access-Control-Allow-Methods", "OPTION")
+		w.Header().Add("Content-Type", "application/json")
+
 		if req.Method != "POST" {
 			w.WriteHeader(405)
 			io.WriteString(w, "only POST allowed")
@@ -131,6 +136,11 @@ func main() {
 	}
 
 	introduceLatency := func(w http.ResponseWriter, req *http.Request) {
+
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "POST")
+		w.Header().Add("Access-Control-Allow-Methods", "OPTION")
+		w.Header().Add("Content-Type", "application/json")
 
 		if req.Method != "POST" {
 			w.WriteHeader(405)
