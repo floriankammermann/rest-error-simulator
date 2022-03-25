@@ -6,7 +6,8 @@
 /out-tsc
 # Only exists if Bazel was run
 /bazel-out
-
+.browserslistrc
+.editorconfig
 # dependencies
 /node_modules
 
@@ -17,6 +18,8 @@ chrome-profiler-events*.json
 /.idea
 .project
 .classpath
+.angular/*
+.vscode/*
 .c9/
 *.launch
 .settings/
