@@ -141,7 +141,7 @@ func main() {
 				failureRatioModulo = calculateFailureRationModulo(errorratioInt)
 				log.Printf("set failureRatioModulo to %d", failureRatioModulo)
 			}
-			time.AfterFunc(10*time.Second, deleteUUID)
+			time.AfterFunc(5*time.Minute, deleteUUID)
 		} else {
 			w.WriteHeader(408)
 		}
@@ -171,7 +171,7 @@ func main() {
 				}
 				s.LatencyInMs = latencyinms
 				log.Printf("set latencyinms to %d", latencyinms)
-				time.AfterFunc(10*time.Second, deleteUUID)
+				time.AfterFunc(5*time.Minute, deleteUUID)
 			}
 		} else {
 			w.WriteHeader(408)
@@ -192,7 +192,7 @@ func main() {
 			clientUUIDinstr = clientUUID[0]
 			js, _ := json.Marshal(clientUUIDinstr)
 			w.Write(js)
-			time.AfterFunc(1*time.Minute, deleteUUID)
+			time.AfterFunc(5*time.Minute, deleteUUID)
 		} else {
 			response_claimed := "Instance is already claimed"
 			js2, _ := json.Marshal(response_claimed)
