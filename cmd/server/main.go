@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -38,6 +39,7 @@ type Specification struct {
 
 var failureRatioModulo int
 var latencyinms int
+var clientUUIDinstr string
 
 func (s *Specification) init() {
 	if s.ResponseCodeSuccess == 0 {
@@ -67,6 +69,10 @@ func getResponseCode(requestCounter, ratioModulo, successCode, errorCode int) in
 	} else {
 		return errorCode
 	}
+}
+
+func deleteUUID() {
+	clientUUIDinstr = ""
 }
 
 func main() {
@@ -116,22 +122,28 @@ func main() {
 
 		errorcode := req.URL.Query()["errorcode"]
 		errorratio := req.URL.Query()["errorratio"]
+		clientUUID := req.URL.Query()["clientUUID"]
 
-		if len(errorcode) != 0 {
-			errorcodeInt, err := strconv.Atoi(errorcode[0])
-			if err != nil {
-				log.Printf("errorcode is not a number: %s", errorcode)
+		if clientUUID[0] == clientUUIDinstr && len(clientUUIDinstr) != 0 {
+			if len(errorcode) != 0 {
+				errorcodeInt, err := strconv.Atoi(errorcode[0])
+				if err != nil {
+					log.Printf("errorcode is not a number: %s", errorcode)
+				}
+				s.ResponseCodeFailure = errorcodeInt
+				log.Printf("set ResponseCode to %d", s.ResponseCodeFailure)
 			}
-			s.ResponseCodeFailure = errorcodeInt
-			log.Printf("set ResponseCode to %d", s.ResponseCodeFailure)
-		}
-		if len(errorratio) != 0 {
-			errorratioInt, err := strconv.Atoi(errorratio[0])
-			if err != nil {
-				log.Printf("errorratio is not a number: %s", errorratio)
+			if len(errorratio) != 0 {
+				errorratioInt, err := strconv.Atoi(errorratio[0])
+				if err != nil {
+					log.Printf("errorratio is not a number: %s", errorratio)
+				}
+				failureRatioModulo = calculateFailureRationModulo(errorratioInt)
+				log.Printf("set failureRatioModulo to %d", failureRatioModulo)
 			}
-			failureRatioModulo = calculateFailureRationModulo(errorratioInt)
-			log.Printf("set failureRatioModulo to %d", failureRatioModulo)
+			time.AfterFunc(10*time.Second, deleteUUID)
+		} else {
+			w.WriteHeader(408)
 		}
 	}
 
@@ -149,14 +161,62 @@ func main() {
 		}
 
 		latencyinmsStr := req.URL.Query()["latencyinms"]
+		clientUUID := req.URL.Query()["clientUUID"]
 
-		if len(latencyinmsStr) != 0 {
-			latencyinms, err := strconv.Atoi(latencyinmsStr[0])
-			if err != nil {
-				log.Printf("latencyinms is not a number: %s", latencyinmsStr)
+		if clientUUID[0] == clientUUIDinstr && len(clientUUIDinstr) != 0 {
+			if len(latencyinmsStr) != 0 {
+				latencyinms, err := strconv.Atoi(latencyinmsStr[0])
+				if err != nil {
+					log.Printf("latencyinms is not a number: %s", latencyinmsStr)
+				}
+				s.LatencyInMs = latencyinms
+				log.Printf("set latencyinms to %d", latencyinms)
+				time.AfterFunc(10*time.Second, deleteUUID)
 			}
-			s.LatencyInMs = latencyinms
-			log.Printf("set latencyinms to %d", latencyinms)
+		} else {
+			w.WriteHeader(408)
+		}
+	}
+
+	introduceUUID := func(w http.ResponseWriter, req *http.Request) {
+
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "GET")
+		w.Header().Add("Access-Control-Allow-Methods", "OPTION")
+		w.Header().Add("Content-Type", "application/json")
+
+		clientUUID := req.URL.Query()["clientUUID"]
+
+		if clientUUIDinstr == "" {
+			log.Printf("clientUUID: %s", clientUUID[0])
+			clientUUIDinstr = clientUUID[0]
+			js, _ := json.Marshal(clientUUIDinstr)
+			w.Write(js)
+			time.AfterFunc(1*time.Minute, deleteUUID)
+		} else {
+			response_claimed := "Instance is already claimed"
+			js2, _ := json.Marshal(response_claimed)
+			log.Printf("Instance is already claimed")
+			w.Write(js2)
+		}
+	}
+
+	abolishUUID := func(w http.ResponseWriter, req *http.Request) {
+
+		w.Header().Add("Access-Control-Allow-Origin", "*")
+		w.Header().Add("Access-Control-Allow-Methods", "GET")
+		w.Header().Add("Access-Control-Allow-Methods", "OPTION")
+		w.Header().Add("Content-Type", "application/json")
+
+		clientUUID := req.URL.Query()["clientUUID"]
+
+		if clientUUIDinstr == clientUUID[0] {
+			deleteUUID()
+			js, _ := json.Marshal("The Instance is now available")
+			w.Write(js)
+		} else {
+			js, _ := json.Marshal("Wrong UUID to delete the Claim")
+			w.Write(js)
 		}
 	}
 
@@ -176,6 +236,8 @@ func main() {
 	http.HandleFunc("/best-tools", bestTools)
 	http.HandleFunc("/control/error", introduceHttpErrorCodes)
 	http.HandleFunc("/control/latency", introduceLatency)
+	http.HandleFunc("/control/uuid", introduceUUID)
+	http.HandleFunc("/control/uuid/delete", abolishUUID)
 	http.HandleFunc("/control", controlParams)
 	http.Handle("/metrics", promhttp.Handler())
 	log.Println("Listening for requests at http://localhost:8080/best-tools")

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { catchError, map, throwError } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -14,10 +14,10 @@ export class HttpserviceService {
 
   constructor(private httpClient: HttpClient) { }
 
-  sendErrorRatio(errorRatio: Number): any {
+  sendErrorRatio(errorRatio: Number, uuid: string): any {
     return this.httpClient
       .post<any>(
-        environment.backendUrl + "/control/error?errorratio=" + errorRatio,
+        environment.backendUrl + "/control/error?errorratio=" + errorRatio + "&clientUUID=" + uuid,
         errorRatio
       )
       .pipe(
@@ -27,17 +27,31 @@ export class HttpserviceService {
       );
   }
 
-  sendLatency(latency: Number): any {
+  sendLatency(latency: Number, uuid: string): any {
     return this.httpClient
       .post<any>(
-        environment.backendUrl + "/control/latency?latencyinms=" + latency,
+        environment.backendUrl + "/control/latency?latencyinms=" + latency + "&clientUUID=" + uuid,
         latency
       )
       .pipe(
         catchError((error) => {
-          return throwError('Error Ratio API not working')
+          return throwError('Latency API not working')
         })
       );
+  }
+
+  sendUUID(uuid: string): any {
+    return this.httpClient
+      .get<any>(
+        environment.backendUrl + "/control/uuid?clientUUID=" + uuid,
+      )
+  }
+
+  removeUUID(uuid: string): any {
+    return this.httpClient
+      .get<any>(
+        environment.backendUrl + "/control/uuid/delete?clientUUID=" + uuid,
+      )
   }
 
   getControls(): any {
