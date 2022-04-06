@@ -41,13 +41,13 @@ export class AppComponent {
     if (_errorRatio > 0 && _errorRatio <= 100) {
       this.error_response = "";
       if (this.myuuid == "") {
-        this.error_response = "Du musst die Instance zuerst claimen"
+        this.error_response = "You have to claim the instance first"
       } else {
         this.backendData.sendErrorRatio(_errorRatio, this.myuuid).subscribe((_: any) => {
         });
       }
     } else {
-      this.error_response = "Error Ratio muss zwischen 1 und 100 sein."
+      this.error_response = "Error Ratio must be between 1 and 100"
     }
   }
 
@@ -56,16 +56,16 @@ export class AppComponent {
     if (_latency > 0 && _latency <= 10000) {
       this.error_response = "";
       if (this.myuuid == "") {
-        this.error_response = "Du musst die Instance zuerst claimen"
+        this.error_response = "You have to claim the instance first"
       } else {
         this.backendData.sendLatency(_latency, this.myuuid).subscribe((_: any) => {
         }, (_: any) =>{
           this.myuuid = ""
-          this.error_response = "UUID ist abgelaufen. Versuchen Sie erneut die Instance zu claimen."
+          this.error_response = "UUID has expired. Try to claim the instance again."
         })
       }
     } else {
-      this.error_response = "Latency muss zwischen 1 und 10000 sein."
+      this.error_response = "Latency must be between 1 and 10000."
     }
   }
 
