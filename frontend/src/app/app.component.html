@@ -13,6 +13,7 @@
 <div class="home-container" role="banner">
   <h1>Rest-Error-Simulator-Frontend</h1>
   <p class="error_response">{{this.error_response}}</p>
+  <p>Before you can run a request, you need to claim the instance for yourself. Press the "Claim Instance" button</p>
   <form class="form">
     <h2>Errorratio</h2>
     <input #errorratio type="number"  class="form__field" min="0" max="100" value="1"/>
@@ -22,4 +23,10 @@
     <input #latency type="number" class="form__field" min="0" max="10000" value="1000">
     <button type="button" class="btn btn--primary btn--inside uppercase" (click)="onSubmitLatency()">Send</button>
   </form>
+  <br>
+  <br>
+  <button type="button" [hidden]="this.myuuid" class="btn btn--primary btn--inside uppercase" (click)="getUUID()">Claim Instance</button>
+  <button type="button" [hidden]="!this.myuuid" class="btn btn--primary btn--inside uppercase" (click)="releaseUUID()">Release Instance</button>
+
+  <h1>{{ this.myuuid }}</h1>
 </div>
